@@ -20,12 +20,13 @@ export default function ProductsTable() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Extract unique categories from products
-  const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
+  const categories = Array.from(new Set(products.map(p => p.category?.trim()).filter(Boolean) as string[]));
   const branches = ['O10', 'G9', 'I7'];
 
   const filtered = filterProducts(products, searchTerm).filter(p => {
     if (selectedBranch && p.branch !== selectedBranch) return false;
-    if (selectedCategory && p.category !== selectedCategory) return false;
+    const productCategory = p.category?.trim() || '';
+    if (selectedCategory && productCategory && productCategory !== selectedCategory) return false;
     return true;
   });
 
@@ -112,7 +113,7 @@ export default function ProductsTable() {
                 <tr key={p.id} className={`border-b border-[#141414] transition-colors ${isLowStock ? 'bg-red-100 hover:bg-red-200' : 'hover:bg-gray-50'}`}>
                   <td className={`font-bold ${settings.compactTables ? 'p-3' : 'p-4'} ${isLowStock ? 'text-red-700' : ''}`}>{p.code}</td>
                   <td className={`${settings.compactTables ? 'p-3' : 'p-4'} ${isLowStock ? 'text-red-700' : ''}`}>{p.name}</td>
-                  <td className={`${settings.compactTables ? 'p-3' : 'p-4'} ${isLowStock ? 'text-red-700' : ''}`}>{p.category || '-'}</td>
+                  <td className={`${settings.compactTables ? 'p-3' : 'p-4'} ${isLowStock ? 'text-red-700' : ''}`}>{p.category?.trim() || 'Sin categoría'}</td>
                   <td className={`${settings.compactTables ? 'p-3' : 'p-4'} font-semibold ${isLowStock ? 'text-red-700' : ''}`}>{p.branch}</td>
                   <td className={`${settings.compactTables ? 'p-3' : 'p-4'} ${isLowStock ? 'text-red-700' : ''}`}>{p.description}</td>
                   <td className={`${settings.compactTables ? 'p-3' : 'p-4'} text-right ${isLowStock ? 'text-red-700' : ''}`}>{stats.initialStock}</td>

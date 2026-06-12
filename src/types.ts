@@ -8,7 +8,8 @@ export interface Product {
   code: string;
   name: string; // Producto in Excel
   description: string; // Descripción in Excel
-  category: string;
+  category?: string;
+  material?: string;
   branch: Branch;
   unit: Unit;
   cost: number;

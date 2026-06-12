@@ -1,5 +1,5 @@
 import { atom } from 'nanostores';
-import { supabase } from '../lib/supabaseClient';
+import { publicSupabase } from '../lib/supabaseClient';
 import type { Product, Movement, Notification } from '../types';
 import { $settings } from './settingsStore';
 
@@ -14,11 +14,11 @@ export async function loadFromDatabase() {
   $loading.set(true);
   try {
     const [productsRes, movementsRes] = await Promise.all([
-      supabase
+      publicSupabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: true }),
-      supabase
+      publicSupabase
         .from('movements')
         .select('*')
         .order('created_at', { ascending: true }),
@@ -44,7 +44,7 @@ export async function loadFromDatabase() {
 // --- Product Actions ---
 export async function addProduct(product: Product): Promise<boolean> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await publicSupabase
       .from('products')
       .insert({
         code: product.code,
@@ -79,7 +79,7 @@ export async function addProduct(product: Product): Promise<boolean> {
 
 export async function deleteProduct(id: string): Promise<boolean> {
   try {
-    const { error } = await supabase
+    const { error } = await publicSupabase
       .from('products')
       .delete()
       .eq('id', id);
@@ -104,7 +104,7 @@ export async function deleteProduct(id: string): Promise<boolean> {
 
 export async function updateProduct(product: Product): Promise<boolean> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await publicSupabase
       .from('products')
       .update({
         code: product.code,
@@ -158,7 +158,7 @@ export async function importProducts(newProducts: Product[]): Promise<number> {
       cost: p.cost,
     }));
 
-    const { data, error } = await supabase
+    const { data, error } = await publicSupabase
       .from('products')
       .insert(rows)
       .select();
@@ -190,7 +190,7 @@ export async function addMovement(movement: Movement): Promise<boolean> {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await publicSupabase
       .from('movements')
       .insert({
         product_id: movement.productId,
@@ -260,6 +260,7 @@ function mapDbToProduct(row: Record<string, unknown>): Product {
     name: (row.name as string) || (row.description as string) || '',
     description: (row.description as string) || '',
     category: (row.category as string) || '',
+    material: (row.material as string) || '',
     branch: (row.branch as string) || 'O10',
     unit: (row.unit as string) || 'Cajas',
     cost: Number(row.cost),

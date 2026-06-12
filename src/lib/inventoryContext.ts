@@ -10,6 +10,8 @@ export function buildSystemPrompt(products: Product[], movements: Movement[]): s
   const settings = $settings.get();
   const currency = settings.currency;
 
+  const getCategoryLabel = (category?: string) => category?.trim() || 'Sin categoría';
+
   // --- Product summary with stock levels ---
   const productLines = products.map(p => {
     const stock = calculateStock(p.id, movements);
@@ -20,7 +22,7 @@ export function buildSystemPrompt(products: Product[], movements: Movement[]): s
     const totalEntries = movements
       .filter(m => m.productId === p.id && m.type === 'IN')
       .reduce((sum, m) => sum + m.quantity, 0);
-    return `- ${p.code} | ${p.description} | Cat: ${p.category} | Mat: ${p.material} | Stock: ${stock} ${p.unit} | Costo: ${formatMoney(p.cost, currency)} | Valor en almacén: ${formatMoney(totalValue, currency)} | Entradas: ${totalEntries} | Salidas: ${totalSales}`;
+    return `- ${p.code} | ${p.description} | Cat: ${getCategoryLabel(p.category)} | Mat: ${p.material || 'Sin material'} | Stock: ${stock} ${p.unit} | Costo: ${formatMoney(p.cost, currency)} | Valor en almacén: ${formatMoney(totalValue, currency)} | Entradas: ${totalEntries} | Salidas: ${totalSales}`;
   }).join('\n');
 
   // --- Category breakdown ---
@@ -30,8 +32,9 @@ export function buildSystemPrompt(products: Product[], movements: Movement[]): s
     const sales = movements
       .filter(m => m.productId === p.id && m.type === 'OUT')
       .reduce((sum, m) => sum + m.quantity, 0);
-    const existing = categoryMap.get(p.category) || { count: 0, totalValue: 0, totalSales: 0 };
-    categoryMap.set(p.category, {
+    const category = getCategoryLabel(p.category);
+    const existing = categoryMap.get(category) || { count: 0, totalValue: 0, totalSales: 0 };
+    categoryMap.set(category, {
       count: existing.count + 1,
       totalValue: existing.totalValue + (stock * p.cost),
       totalSales: existing.totalSales + sales,
