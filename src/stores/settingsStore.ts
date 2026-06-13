@@ -12,7 +12,7 @@ export type AppSettings = {
 };
 
 export const defaultSettings: AppSettings = {
-  companyName: 'Mi Empresa',
+  companyName: '',
   currency: 'PEN',
   defaultReportFormat: 'pdf',
   lowStockThreshold: 70,
