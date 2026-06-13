@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Bell, CircleDollarSign, Database, LayoutGrid, Palette, ShieldCheck } from 'lucide-react';
 import { useStore } from '@nanostores/react';
 import { $settings, type AppSettings, updateSettings } from '../stores/settingsStore';
+import BranchManager from './BranchManager';
 
 export default function SettingsPanel() {
   const settings = useStore($settings);
@@ -197,6 +198,10 @@ export default function SettingsPanel() {
             <span className="rounded-full bg-white px-3 py-1 shadow-sm">Notificaciones</span>
             <span className="rounded-full bg-white px-3 py-1 shadow-sm">Auto guardado</span>
           </div>
+        </div>
+
+        <div className="xl:col-span-2">
+          <BranchManager />
         </div>
       </div>
     </div>

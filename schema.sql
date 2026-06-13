@@ -7,6 +7,24 @@
 create extension if not exists "pgcrypto";
 
 -- ---------------------------------------------
+-- Tabla: branches (sucursales)
+-- ---------------------------------------------
+create table if not exists branches (
+  id          uuid primary key default gen_random_uuid(),
+  code        text not null unique,
+  name        text not null,
+  description text,
+  created_at  timestamptz not null default now()
+);
+
+-- Insertar sucursales por defecto
+insert into branches (code, name, description) values
+  ('O10', 'O10', 'Sucursal O10'),
+  ('G9', 'G9', 'Sucursal G9'),
+  ('I7', 'I7', 'Sucursal I7')
+on conflict (code) do nothing;
+
+-- ---------------------------------------------
 -- Tabla: products
 -- ---------------------------------------------
 create table if not exists products (
@@ -15,7 +33,7 @@ create table if not exists products (
   description text not null,
   category    text,
   branch      text not null default 'O10'
-                check (branch in ('O10', 'G9', 'I7')),
+                references branches(code) on delete restrict,
   material    text,
   unit        text not null default 'Cajas'
                 check (unit in ('Cajas', 'Yardas', 'Unidades')),

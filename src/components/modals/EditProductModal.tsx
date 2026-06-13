@@ -1,6 +1,8 @@
 import React from 'react';
+import { useStore } from '@nanostores/react';
 import Modal from '../ui/Modal';
 import { updateProduct } from '../../stores/inventoryStore';
+import { $branches } from '../../stores/branchStore';
 import type { Product, Unit, Branch } from '../../types';
 
 interface EditProductModalProps {
@@ -10,6 +12,8 @@ interface EditProductModalProps {
 }
 
 export default function EditProductModal({ isOpen, onClose, product }: EditProductModalProps) {
+  const branches = useStore($branches);
+  
   if (!product) return null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -80,9 +84,9 @@ export default function EditProductModal({ isOpen, onClose, product }: EditProdu
               defaultValue={product.branch}
               className="border-b-2 border-[#141414] py-2 focus:outline-none bg-white"
             >
-              <option value="O10">O10</option>
-              <option value="G9">G9</option>
-              <option value="I7">I7</option>
+              {branches.map(branch => (
+                <option key={branch.code} value={branch.code}>{branch.code}</option>
+              ))}
             </select>
           </div>
         </div>

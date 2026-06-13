@@ -4,6 +4,7 @@ import { AnimatePresence } from 'motion/react';
 import { FileUp, FileDown } from 'lucide-react';
 import { $products, $movements, loadFromDatabase, importProducts } from '../stores/inventoryStore';
 import { $settings } from '../stores/settingsStore';
+import { loadBranches } from '../stores/branchStore';
 import { parseExcelFile, exportInventoryToExcel } from '../lib/excelHandlers';
 import exportInventoryToPDF from '../lib/pdfExporter';
 import type { TabType } from '../types';
@@ -47,6 +48,7 @@ export default function KardexApp() {
   // Load data from Supabase on mount
   useEffect(() => {
     loadFromDatabase();
+    loadBranches();
   }, []);
 
   // Excel import handler

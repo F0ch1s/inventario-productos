@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { motion } from 'motion/react';
 import { Search, Plus, Trash2, Pencil } from 'lucide-react';
 import { $products, $movements, getStock, deleteProduct, getProductStats } from '../stores/inventoryStore';
+import { $branches } from '../stores/branchStore';
 import { $settings, formatMoney } from '../stores/settingsStore';
 import { filterProducts } from '../lib/calculations';
 import ProductModal from './modals/ProductModal';
@@ -13,6 +14,7 @@ export default function ProductsTable() {
   const products = useStore($products);
   const movements = useStore($movements);
   const settings = useStore($settings);
+  const branches = useStore($branches);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBranch, setSelectedBranch] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -21,7 +23,7 @@ export default function ProductsTable() {
 
   // Extract unique categories from products
   const categories = Array.from(new Set(products.map(p => p.category?.trim()).filter(Boolean) as string[]));
-  const branches = ['O10', 'G9', 'I7'];
+  const branchOptions = branches.map(b => b.code);
 
   const filtered = filterProducts(products, searchTerm).filter(p => {
     if (selectedBranch && p.branch !== selectedBranch) return false;
@@ -65,7 +67,7 @@ export default function ProductsTable() {
               className="w-full px-4 py-2 bg-white border border-[#141414] text-sm focus:outline-none focus:ring-1 focus:ring-[#141414]"
             >
               <option value="">Todas las sucursales</option>
-              {branches.map(branch => (
+              {branchOptions.map(branch => (
                 <option key={branch} value={branch}>{branch}</option>
               ))}
             </select>

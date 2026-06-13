@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useStore } from '@nanostores/react';
 import Modal from '../ui/Modal';
 import { addProduct, $products } from '../../stores/inventoryStore';
+import { $branches } from '../../stores/branchStore';
 import type { Product, Unit, Branch } from '../../types';
 
 interface ProductModalProps {
@@ -36,6 +37,7 @@ function generateCode(description: string, existingProducts: Product[]): string 
 
 export default function ProductModal({ isOpen, onClose }: ProductModalProps) {
   const products = useStore($products);
+  const branches = useStore($branches);
   const [description, setDescription] = useState('');
 
   const autoCode = useMemo(() => generateCode(description, products), [description, products]);
@@ -109,9 +111,9 @@ export default function ProductModal({ isOpen, onClose }: ProductModalProps) {
           <div className="flex flex-col gap-1">
             <label className="text-[10px] uppercase font-bold opacity-70">Sucursal</label>
             <select name="branch" required className="border-b-2 border-[#141414] py-2 focus:outline-none bg-white">
-              <option value="O10">O10</option>
-              <option value="G9">G9</option>
-              <option value="I7">I7</option>
+              {branches.map(branch => (
+                <option key={branch.code} value={branch.code}>{branch.code}</option>
+              ))}
             </select>
           </div>
         </div>

@@ -1,7 +1,14 @@
 export type Unit = 'Cajas' | 'Yardas' | 'Unidades';
 export type MovementType = 'IN' | 'OUT';
 
-export type Branch = 'O10' | 'G9' | 'I7';
+export type Branch = string;
+
+export interface BranchData {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+}
 
 export interface Product {
   id: string;
