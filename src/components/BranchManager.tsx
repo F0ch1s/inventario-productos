@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { Building2, Plus, Trash2, Pencil } from 'lucide-react';
-import { $branches, loadBranches, deleteBranch } from '../../stores/branchStore';
-import AddBranchModal from '../modals/AddBranchModal';
-import EditBranchModal from '../modals/EditBranchModal';
-import type { BranchData } from '../../types';
+import { $branches, loadBranches, deleteBranch } from '../stores/branchStore';
+import AddBranchModal from './modals/AddBranchModal';
+import EditBranchModal from './modals/EditBranchModal';
+import type { BranchData } from '../types';
 
 export default function BranchManager() {
   const branches = useStore($branches);
@@ -72,7 +72,7 @@ export default function BranchManager() {
               </tr>
             </thead>
             <tbody>
-              {branches.map((branch) => (
+              {branches.map((branch: BranchData) => (
                 <tr key={branch.id} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="px-4 py-3 font-medium text-slate-900">{branch.code}</td>
                   <td className="px-4 py-3 text-slate-700">{branch.name}</td>
