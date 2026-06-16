@@ -5,7 +5,7 @@ import { Search, Plus, Trash2, Pencil } from 'lucide-react';
 import { $products, $movements, getStock, deleteProduct, getProductStats } from '../stores/inventoryStore';
 import { $branches } from '../stores/branchStore';
 import { $settings, formatMoney } from '../stores/settingsStore';
-import { filterProducts } from '../lib/calculations';
+import { filterProducts, formatQuantity } from '../lib/calculations';
 import ProductModal from './modals/ProductModal';
 import EditProductModal from './modals/EditProductModal';
 import type { Product } from '../types';
@@ -118,13 +118,13 @@ export default function ProductsTable() {
                   <td className={`${settings.compactTables ? 'p-3' : 'p-4'} ${isLowStock ? 'text-red-700' : ''}`}>{p.category?.trim() || 'Sin categoría'}</td>
                   <td className={`${settings.compactTables ? 'p-3' : 'p-4'} font-semibold ${isLowStock ? 'text-red-700' : ''}`}>{p.branch}</td>
                   <td className={`${settings.compactTables ? 'p-3' : 'p-4'} ${isLowStock ? 'text-red-700' : ''}`}>{p.description}</td>
-                  <td className={`${settings.compactTables ? 'p-3' : 'p-4'} text-right ${isLowStock ? 'text-red-700' : ''}`}>{stats.initialStock}</td>
+                  <td className={`${settings.compactTables ? 'p-3' : 'p-4'} text-right ${isLowStock ? 'text-red-700' : ''}`}>{formatQuantity(stats.initialStock, p.unit)}</td>
                   <td className={`${settings.compactTables ? 'p-3' : 'p-4'} text-right ${isLowStock ? 'text-red-700' : ''}`}>{formatMoney(p.cost, settings.currency)}</td>
-                  <td className={`${settings.compactTables ? 'p-3' : 'p-4'} text-right ${isLowStock ? 'text-red-700' : ''}`}>{stats.entradas}</td>
-                  <td className={`${settings.compactTables ? 'p-3' : 'p-4'} text-right ${isLowStock ? 'text-red-700' : ''}`}>{stats.salidas}</td>
+                  <td className={`${settings.compactTables ? 'p-3' : 'p-4'} text-right ${isLowStock ? 'text-red-700' : ''}`}>{formatQuantity(stats.entradas, p.unit)}</td>
+                  <td className={`${settings.compactTables ? 'p-3' : 'p-4'} text-right ${isLowStock ? 'text-red-700' : ''}`}>{formatQuantity(stats.salidas, p.unit)}</td>
                   <td className={`${settings.compactTables ? 'p-3' : 'p-4'} text-right`}>
                     <span className={isLowStock ? 'text-red-700 font-bold' : ''}>
-                      {stats.stock} {p.unit}
+                      {formatQuantity(stats.stock, p.unit)} {p.unit}
                     </span>
                     {isLowStock && (
                       <div className="text-[10px] text-red-600 font-semibold mt-0.5">⚠ STOCK BAJO</div>

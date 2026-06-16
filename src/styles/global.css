@@ -1,3 +1,73 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html, body {
+  background-color: #06140a;
+}
+
+body {
+  position: relative;
+}
+
+/* CRT scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.18) 3px,
+    rgba(0, 0, 0, 0) 4px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* CRT vignette glow */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  box-shadow: inset 0 0 180px rgba(0, 0, 0, 0.65);
+  background: radial-gradient(ellipse at center, rgba(60, 255, 94, 0.04), transparent 70%);
+}
+
+::selection {
+  background: #3cff5e;
+  color: #06140a;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: #06140a;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f7a35;
+  border: 2px solid #06140a;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3cff5e;
+}
+
+.text-glow {
+  text-shadow: 0 0 4px currentColor, 0 0 10px currentColor;
+}
+
+@keyframes blink-cursor {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: '_';
+  animation: blink-cursor 1s steps(1) infinite;
+}

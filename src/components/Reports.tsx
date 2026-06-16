@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Download, FileSpreadsheet, FileText, Sparkles, BarChart3 } from 'lucide-react';
 import { $products, $movements } from '../stores/inventoryStore';
 import { $settings, formatMoney } from '../stores/settingsStore';
-import { getProductSalesRanking, getTotalEntryCost, getTotalExitCost, calculateStats } from '../lib/calculations';
+import { getProductSalesRanking, getTotalEntryCost, getTotalExitCost, calculateStats, formatQuantity } from '../lib/calculations';
 import ReportCard from './ui/ReportCard';
 import { exportInventoryToExcel } from '../lib/excelHandlers';
 import exportInventoryToPDF from '../lib/pdfExporter';
@@ -124,7 +124,7 @@ export default function Reports() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-mono font-bold text-green-600">+{p.sales}</div>
+                <div className="font-mono font-bold text-green-600">+{formatQuantity(p.sales, p.unit)}</div>
                 <div className="text-[10px] uppercase text-slate-400">{p.unit}</div>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function Reports() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-mono font-bold text-orange-600">+{p.sales}</div>
+                <div className="font-mono font-bold text-orange-600">+{formatQuantity(p.sales, p.unit)}</div>
                 <div className="text-[10px] uppercase text-slate-400">{p.unit}</div>
               </div>
             </div>

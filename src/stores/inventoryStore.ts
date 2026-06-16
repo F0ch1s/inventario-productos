@@ -2,6 +2,7 @@ import { atom } from 'nanostores';
 import { publicSupabase } from '../lib/supabaseClient';
 import type { Product, Movement, Notification } from '../types';
 import { $settings } from './settingsStore';
+import { validateQuantity } from '../lib/calculations';
 
 // --- Atoms ---
 export const $products = atom<Product[]>([]);
@@ -180,6 +181,19 @@ export async function importProducts(newProducts: Product[]): Promise<number> {
 
 // --- Movement Actions ---
 export async function addMovement(movement: Movement): Promise<boolean> {
+  const product = $products.get().find(p => p.id === movement.productId);
+  if (!product) {
+    addNotification('Producto no encontrado', 'error');
+    return false;
+  }
+
+  // Validate quantity against the product's unit (e.g. no decimals for Cajas/Unidades)
+  const quantityCheck = validateQuantity(movement.quantity, product.unit);
+  if (!quantityCheck.valid) {
+    addNotification(quantityCheck.error!, 'error');
+    return false;
+  }
+
   // Validate stock before sending to DB
   if (movement.type === 'OUT') {
     const currentStock = getStock(movement.productId);

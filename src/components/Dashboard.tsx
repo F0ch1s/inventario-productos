@@ -2,7 +2,7 @@ import { useStore } from '@nanostores/react';
 import { motion } from 'motion/react';
 import { FileBox, TrendingUp, TrendingDown, History, AlertCircle } from 'lucide-react';
 import { $products, $movements, getStock } from '../stores/inventoryStore';
-import { calculateStats, getCriticalProducts } from '../lib/calculations';
+import { calculateStats, getCriticalProducts, formatQuantity } from '../lib/calculations';
 import { $settings, formatMoney } from '../stores/settingsStore';
 import StatCard from './ui/StatCard';
 
@@ -68,7 +68,7 @@ export default function Dashboard() {
                   <tr key={p.id} className="border-b border-[#141414] hover:bg-gray-50">
                     <td className="py-3">{p.code}</td>
                     <td className="py-3">{p.description}</td>
-                    <td className="py-3">{getStock(p.id)} {p.unit}</td>
+                    <td className="py-3">{formatQuantity(getStock(p.id), p.unit)} {p.unit}</td>
                     <td className="py-3">
                       <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded text-xs">CRÍTICO</span>
                     </td>

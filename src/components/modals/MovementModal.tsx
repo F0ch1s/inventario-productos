@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import Modal from '../ui/Modal';
-import { $products, addMovement, getStock } from '../../stores/inventoryStore';
+import { $products, addMovement, getStock, addNotification } from '../../stores/inventoryStore';
+import { isDiscreteUnit, validateQuantity } from '../../lib/calculations';
 import type { Movement, MovementType } from '../../types';
 
 interface MovementModalProps {
@@ -15,6 +16,7 @@ export default function MovementModal({ isOpen, onClose }: MovementModalProps) {
   const [cost, setCost] = useState('');
 
   const selectedProduct = products.find(p => p.id === selectedProductId);
+  const discreteUnit = selectedProduct ? isDiscreteUnit(selectedProduct.unit) : false;
 
   // Auto-fill cost when a product is selected
   useEffect(() => {
@@ -29,12 +31,24 @@ export default function MovementModal({ isOpen, onClose }: MovementModalProps) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
+    if (!selectedProduct) {
+      addNotification('Selecciona un producto', 'error');
+      return;
+    }
+
+    const quantity = parseFloat(formData.get('quantity') as string);
+    const quantityCheck = validateQuantity(quantity, selectedProduct.unit);
+    if (!quantityCheck.valid) {
+      addNotification(quantityCheck.error!, 'error');
+      return;
+    }
+
     const newMovement: Movement = {
       id: crypto.randomUUID(),
       productId: formData.get('productId') as string,
       date: new Date().toISOString(),
       type: formData.get('type') as MovementType,
-      quantity: parseFloat(formData.get('quantity') as string),
+      quantity,
       cost: parseFloat(cost) || 0,
       notes: formData.get('notes') as string,
     };
@@ -81,15 +95,19 @@ export default function MovementModal({ isOpen, onClose }: MovementModalProps) {
             </select>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] uppercase font-bold opacity-70">Cantidad</label>
+            <label className="text-[10px] uppercase font-bold opacity-70">
+              Cantidad {selectedProduct && (
+                <span className="font-normal opacity-60">({discreteUnit ? 'solo enteros' : 'admite decimales'})</span>
+              )}
+            </label>
             <input
               name="quantity"
               type="number"
-              step="0.01"
-              min="0.01"
+              step={discreteUnit ? '1' : '0.01'}
+              min={discreteUnit ? '1' : '0.01'}
               required
               className="border-b-2 border-[#141414] py-2 focus:outline-none focus:border-blue-600"
-              placeholder="Ingrese cantidad"
+              placeholder={discreteUnit ? 'Ingrese cantidad entera' : 'Ingrese cantidad'}
             />
           </div>
         </div>

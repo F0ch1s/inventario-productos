@@ -1,4 +1,44 @@
-import type { Product, Movement, InventoryStats } from '../types';
+import type { Product, Movement, InventoryStats, Unit } from '../types';
+
+/**
+ * Units that represent discrete, indivisible items (cannot have a fractional quantity).
+ * 'Yardas' is excluded because fabric length is legitimately fractional (e.g. 14.5 yardas).
+ */
+export function isDiscreteUnit(unit: Unit): boolean {
+  return unit === 'Cajas' || unit === 'Unidades';
+}
+
+/**
+ * Coerces an arbitrary string (e.g. from an Excel import) into a valid Unit,
+ * falling back to 'Cajas' instead of letting unknown values flow into calculations.
+ */
+export function sanitizeUnit(value: unknown): Unit {
+  return value === 'Yardas' || value === 'Unidades' ? value : 'Cajas';
+}
+
+/**
+ * Validates a quantity against the rules for its unit:
+ * - must be a finite, positive number
+ * - must be a whole number when the unit is discrete (Cajas/Unidades)
+ */
+export function validateQuantity(quantity: number, unit: Unit): { valid: boolean; error?: string } {
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    return { valid: false, error: 'La cantidad debe ser un número mayor a 0' };
+  }
+  if (isDiscreteUnit(unit) && !Number.isInteger(quantity)) {
+    return { valid: false, error: `La unidad "${unit}" no admite decimales. Ingresa un número entero` };
+  }
+  return { valid: true };
+}
+
+/**
+ * Formats a quantity for display, rounding discrete units defensively
+ * in case legacy/imported data contains fractional values.
+ */
+export function formatQuantity(quantity: number, unit: Unit): string {
+  const value = isDiscreteUnit(unit) ? Math.round(quantity) : quantity;
+  return value.toLocaleString('es-PE', { maximumFractionDigits: isDiscreteUnit(unit) ? 0 : 2 });
+}
 
 /**
  * Calculate stock for a specific product based on movements

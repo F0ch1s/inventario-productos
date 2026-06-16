@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
 import type { Product, Movement } from '../types';
-import { calculateStock, getProductSalesRanking, getTotalEntryCost, getTotalExitCost } from './calculations';
+import { calculateStock, getProductSalesRanking, getTotalEntryCost, getTotalExitCost, sanitizeUnit } from './calculations';
 import { $settings, formatMoney } from '../stores/settingsStore';
 
 /**
@@ -19,7 +19,7 @@ export function parseExcelFile(binaryString: string): Product[] {
         code: String(item.Codigo || item.CODE || ''),
         name: String(item.Producto || item.PRODUCTO || item.Nombre || ''),
         description: String(item.Descripcion || item.DESCRIPTION || ''),
-        unit: String(item.Unidad || item.UNIT || 'Cajas'),
+        unit: sanitizeUnit(item.Unidad || item.UNIT),
         cost: parseFloat(String(item.Costo || item.COST)) || 0,
       })
     )

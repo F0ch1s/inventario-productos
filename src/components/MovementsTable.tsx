@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { $products, $movements } from '../stores/inventoryStore';
 import { $settings, formatMoney } from '../stores/settingsStore';
+import { formatQuantity } from '../lib/calculations';
 import MovementModal from './modals/MovementModal';
 
 export default function MovementsTable() {
@@ -70,7 +71,7 @@ export default function MovementsTable() {
                       </span>
                     </td>
                     <td className={`${settings.compactTables ? 'p-3' : 'p-4'} text-right font-bold`}>
-                      {m.quantity} {prod?.unit}
+                      {prod ? formatQuantity(m.quantity, prod.unit) : m.quantity} {prod?.unit}
                     </td>
                     <td className={`${settings.compactTables ? 'p-3' : 'p-4'} text-right`}>{formatMoney(m.cost, settings.currency)}</td>
                     <td className={`${settings.compactTables ? 'p-3' : 'p-4'} opacity-70 italic text-xs`}>{m.notes}</td>
