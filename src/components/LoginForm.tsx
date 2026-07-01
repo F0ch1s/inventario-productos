@@ -79,10 +79,10 @@ export default function LoginForm() {
               <div className="text-white text-2xl font-bold">📊</div>
             </div>
             <h1 className="text-3xl font-bold text-[#141414] font-serif italic">
-              Sistema de Inventario
+              YaraSys
             </h1>
             <p className="text-slate-600 text-sm mt-2">
-              Gestión integral de productos y movimientos
+              Sistema de gestión de inventario y productos
             </p>
           </div>
 
@@ -187,21 +187,7 @@ export default function LoginForm() {
             </p>
           </div>
 
-          {/* Demo Credentials */}
-          {mode === 'login' && (
-            <div className="mt-8 pt-6 border-t border-slate-200">
-              <p className="text-xs text-slate-500 text-center mb-2">
-                Demo: Usa cualquier email y contraseña
-              </p>
-              <button
-                type="button"
-                onClick={handleDemoLogin}
-                className="w-full text-xs py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
-              >
-                Llenar demo
-              </button>
-            </div>
-          )}
+
         </div>
       </div>
     </div>

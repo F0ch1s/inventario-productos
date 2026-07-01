@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useStore } from '@nanostores/react';
 import { motion } from 'motion/react';
 import { Search, Plus, Trash2, Pencil } from 'lucide-react';
 import { $products, $movements, getStock, deleteProduct, getProductStats } from '../stores/inventoryStore';
-import { $branches } from '../stores/branchStore';
 import { $settings, formatMoney } from '../stores/settingsStore';
 import { filterProducts, formatQuantity } from '../lib/calculations';
 import ProductModal from './modals/ProductModal';
@@ -14,16 +13,16 @@ export default function ProductsTable() {
   const products = useStore($products);
   const movements = useStore($movements);
   const settings = useStore($settings);
-  const branches = useStore($branches);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBranch, setSelectedBranch] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  // Extract unique categories from products
+  // Sucursales únicas extraídas dinámicamente de los productos reales
+  const branchOptions = Array.from(new Set(products.map(p => p.branch).filter(Boolean)));
+  // Categorías únicas extraídas dinámicamente de los productos reales
   const categories = Array.from(new Set(products.map(p => p.category?.trim()).filter(Boolean) as string[]));
-  const branchOptions = branches.map(b => b.code);
 
   const filtered = filterProducts(products, searchTerm).filter(p => {
     if (selectedBranch && p.branch !== selectedBranch) return false;

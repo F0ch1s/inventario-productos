@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx';
 import type { Product, Movement } from '../types';
 import { calculateStock, getProductSalesRanking, getTotalEntryCost, getTotalExitCost, sanitizeUnit } from './calculations';
 import { $settings, formatMoney } from '../stores/settingsStore';
+import { generateId } from './uuid';
 
 /**
  * Import products from an Excel file
@@ -15,7 +16,7 @@ export function parseExcelFile(binaryString: string): Product[] {
   return data
     .map(
       (item): Product => ({
-        id: crypto.randomUUID(),
+        id: generateId(),
         code: String(item.Codigo || item.CODE || ''),
         name: String(item.Producto || item.PRODUCTO || item.Nombre || ''),
         description: String(item.Descripcion || item.DESCRIPTION || ''),

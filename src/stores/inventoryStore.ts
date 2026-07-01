@@ -4,13 +4,15 @@ import type { Product, Movement, Notification } from '../types';
 import { $settings } from './settingsStore';
 import { validateQuantity } from '../lib/calculations';
 
-// --- Atoms ---
+// --- Estados Globales ---
 export const $products = atom<Product[]>([]);
 export const $movements = atom<Movement[]>([]);
 export const $notifications = atom<Notification[]>([]);
 export const $loading = atom<boolean>(false);
 
-// --- Load from Supabase ---
+// --- Carga de datos desde Supabase ---
+// Nota de seguridad: Supabase JS utiliza consultas parametrizadas internamente
+// Esto evita vulnerabilidades como inyecciones SQL de forma automática
 export async function loadFromDatabase() {
   $loading.set(true);
   try {
@@ -42,7 +44,7 @@ export async function loadFromDatabase() {
   }
 }
 
-// --- Product Actions ---
+// --- Acciones de Productos ---
 export async function addProduct(product: Product): Promise<boolean> {
   try {
     const { data, error } = await publicSupabase
@@ -60,6 +62,7 @@ export async function addProduct(product: Product): Promise<boolean> {
       .single();
 
     if (error) {
+      console.error('Supabase addProduct error:', error);
       if (error.code === '23505') {
         addNotification('El código de producto ya existe', 'error');
       } else {
@@ -73,6 +76,7 @@ export async function addProduct(product: Product): Promise<boolean> {
     addNotification('Producto añadido correctamente', 'success');
     return true;
   } catch (error) {
+    console.error('Error de conexión addProduct:', error);
     addNotification('Error de conexión al crear producto', 'error');
     return false;
   }
@@ -179,7 +183,7 @@ export async function importProducts(newProducts: Product[]): Promise<number> {
   }
 }
 
-// --- Movement Actions ---
+// --- Acciones de Movimientos ---
 export async function addMovement(movement: Movement): Promise<boolean> {
   const product = $products.get().find(p => p.id === movement.productId);
   if (!product) {
@@ -231,7 +235,7 @@ export async function addMovement(movement: Movement): Promise<boolean> {
   }
 }
 
-// --- Stock Calculation ---
+// --- Cálculo de Stock ---
 export function getStock(productId: string): number {
   const movements = $movements.get();
   return movements
@@ -254,19 +258,21 @@ export function getProductStats(productId: string) {
   return { initialStock, entradas, salidas, stock };
 }
 
-// --- Notification Actions ---
+// --- Acciones de Notificación ---
 export function addNotification(message: string, type: 'success' | 'error') {
-  if (!$settings.get().notifications) return;
+  // Los errores siempre se muestran aunque las notificaciones estén desactivadas
+  if (type === 'success' && !$settings.get().notifications) return;
 
   const id = Date.now();
   const current = $notifications.get();
   $notifications.set([...current, { id, message, type }]);
   setTimeout(() => {
     $notifications.set($notifications.get().filter(n => n.id !== id));
-  }, 3000);
+  }, 4000);
 }
 
-// --- Mapping Helpers (DB snake_case ↔ Frontend camelCase) ---
+// --- Mapeo de Base de Datos a Frontend ---
+// Esta es la estructura que refleja las columnas de la tabla 'products'
 function mapDbToProduct(row: Record<string, unknown>): Product {
   return {
     id: row.id as string,

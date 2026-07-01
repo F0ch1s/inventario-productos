@@ -2,17 +2,16 @@ import type { Product, Movement } from '../types';
 import { calculateStock, getProductSalesRanking, getTotalEntryCost, getTotalExitCost } from './calculations';
 import { $settings, formatMoney } from '../stores/settingsStore';
 
-/**
- * Builds a comprehensive system prompt with real-time inventory data.
- * This gives the AI full context to answer strategic questions.
- */
+// --- Prompt del Sistema (Reglas del Chatbot) ---
+// Aquí le damos el contexto completo de la base de datos a la IA
+// y definimos sus reglas estrictas para evitar respuestas fuera de lugar
 export function buildSystemPrompt(products: Product[], movements: Movement[]): string {
   const settings = $settings.get();
   const currency = settings.currency;
 
   const getCategoryLabel = (category?: string) => category?.trim() || 'Sin categoría';
 
-  // --- Product summary with stock levels ---
+  // --- Resumen de productos con niveles de stock ---
   const productLines = products.map(p => {
     const stock = calculateStock(p.id, movements);
     const totalValue = stock * p.cost;
@@ -25,7 +24,7 @@ export function buildSystemPrompt(products: Product[], movements: Movement[]): s
     return `- ${p.code} | ${p.description} | Cat: ${getCategoryLabel(p.category)} | Mat: ${p.material || 'Sin material'} | Stock: ${stock} ${p.unit} | Costo: ${formatMoney(p.cost, currency)} | Valor en almacén: ${formatMoney(totalValue, currency)} | Entradas: ${totalEntries} | Salidas: ${totalSales}`;
   }).join('\n');
 
-  // --- Category breakdown ---
+  // --- Desglose por categorías ---
   const categoryMap = new Map<string, { count: number; totalValue: number; totalSales: number }>();
   products.forEach(p => {
     const stock = calculateStock(p.id, movements);
@@ -45,25 +44,25 @@ export function buildSystemPrompt(products: Product[], movements: Movement[]): s
     .map(([cat, data]) => `- ${cat}: ${data.count} productos, Valor: ${formatMoney(data.totalValue, currency)}, Ventas totales: ${data.totalSales} unidades`)
     .join('\n');
 
-  // --- Top sellers and low sellers ---
+  // --- Productos más y menos vendidos ---
   const topSellers = getProductSalesRanking(products, movements, 'desc', 5);
   const lowSellers = getProductSalesRanking(products, movements, 'asc', 5);
 
   const topLines = topSellers.map((p, i) => `${i + 1}. ${p.description} (${p.code}) - ${p.sales} salidas`).join('\n');
   const lowLines = lowSellers.map((p, i) => `${i + 1}. ${p.description} (${p.code}) - ${p.sales} salidas`).join('\n');
 
-  // --- Financial summary ---
+  // --- Resumen financiero ---
   const totalInventoryValue = products.reduce((acc, p) => acc + calculateStock(p.id, movements) * p.cost, 0);
   const totalEntries = getTotalEntryCost(movements);
   const totalExits = getTotalExitCost(movements);
 
-  // --- Products with zero stock ---
+  // --- Productos sin stock ---
   const zeroStock = products.filter(p => calculateStock(p.id, movements) <= 0);
   const zeroStockLines = zeroStock.length > 0
     ? zeroStock.map(p => `- ${p.code}: ${p.description}`).join('\n')
     : 'Ninguno';
 
-  // --- Low stock products ---
+  // --- Productos con stock bajo ---
   const lowStockThreshold = settings.lowStockThreshold;
   const lowStock = products.filter(p => {
     const stock = calculateStock(p.id, movements);

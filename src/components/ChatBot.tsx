@@ -1,17 +1,19 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useStore } from '@nanostores/react';
-import { MessageSquare, X, Send, Sparkles, Loader2, Bot, User } from 'lucide-react';
+import { MessageSquare, X, Send, Loader2, Bot, User } from 'lucide-react';
 import { $products, $movements } from '../stores/inventoryStore';
+import { $settings } from '../stores/settingsStore';
 import { buildSystemPrompt } from '../lib/inventoryContext';
 import { streamChat } from '../lib/groqClient';
+import { generateId } from '../lib/uuid';
 import type { ChatMessage } from '../types';
 
 const SUGGESTED_QUESTIONS = [
-  '¿Qué producto debería poner en oferta y por qué?',
-  '¿Cuánto capital tengo inmovilizado en baja rotación?',
-  'Dame un análisis estratégico por categoría',
-  '¿Qué productos necesito reabastecer pronto?',
-  '¿Qué oportunidades de negocio ves en mi inventario?',
+  '¿Qué productos tienen disponibles?',
+  '¿Tienen stock de cintas adhesivas?',
+  '¿Cuántas unidades quedan de [producto]?',
+  '¿Cuál es el precio de [producto]?',
+  'Muéstrame todos los productos de la sucursal O10',
 ];
 
 /** Renders basic markdown: **bold**, bullet lists, and newlines */
@@ -57,12 +59,29 @@ function renderMarkdown(text: string) {
   return <>{elements}</>;
 }
 
+// --- Validación de entrada ---
+const MAX_CHARS = 300;
+const EMOJI_REGEX = /[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE00}-\u{FEFF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu;
+const SPECIAL_SPAM_REGEX = /([!?.,;:@#$%^&*()]{4,})/;
+
+function validateInput(text: string): string | null {
+  if (text.length > MAX_CHARS) return `Máximo ${MAX_CHARS} caracteres permitidos.`;
+  if (EMOJI_REGEX.test(text)) return 'No se permiten emojis en el chat.';
+  if (SPECIAL_SPAM_REGEX.test(text)) return 'Evita repetir caracteres especiales consecutivos.';
+  return null;
+}
+// ---------------------------------
+// COMPONENTE CHATBOT
+// ---------------------------------
+
 export default function ChatBot() {
   const products = useStore($products);
   const movements = useStore($movements);
+  const settings = useStore($settings);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
+  const [inputError, setInputError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -81,14 +100,17 @@ export default function ChatBot() {
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isLoading) return;
+    const validationError = validateInput(text.trim());
+    if (validationError) { setInputError(validationError); return; }
+    setInputError(null);
 
     const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       role: 'user',
       content: text.trim(),
     };
 
-    const assistantId = crypto.randomUUID();
+    const assistantId = generateId();
     const assistantMessage: ChatMessage = {
       id: assistantId,
       role: 'assistant',
@@ -107,14 +129,16 @@ export default function ChatBot() {
       content: m.content,
     }));
 
+    // Preparamos el historial y las reglas estrictas (system)
     const apiMessages = [
       { role: 'system' as const, content: systemPrompt },
       ...conversationHistory,
     ];
 
+    // Llamada a la IA (Groq) enviando todo el contexto
     await streamChat(
       apiMessages,
-      // onChunk
+      // Callback cuando llega un fragmento de texto de la IA
       (chunk) => {
         setMessages(prev =>
           prev.map(m =>
@@ -180,11 +204,11 @@ export default function ChatBot() {
           <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-slate-950 to-slate-800 px-5 py-4 text-white">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
-                <Sparkles className="h-5 w-5" />
+                <Bot className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-sm font-semibold">Asistente IA</div>
-                <div className="text-[10px] uppercase tracking-[0.2em] text-slate-300">GPT-OSS-120B · GROQ</div>
+                <div className="text-sm font-semibold">StockBot</div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-slate-300">Consultas de Inventario · En línea</div>
               </div>
             </div>
             <button
@@ -195,9 +219,9 @@ export default function ChatBot() {
             </button>
           </div>
 
-          {/* Messages Area */}
+          {/* Área de mensajes */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ scrollBehavior: 'smooth' }}>
-            {/* Welcome message */}
+            {/* Mensaje de bienvenida */}
             {showSuggestions && (
               <div className="space-y-4">
                 <div className="flex gap-3">
@@ -205,7 +229,7 @@ export default function ChatBot() {
                     <Bot className="h-4 w-4" />
                   </div>
                   <div className="rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-sm text-slate-700 leading-relaxed">
-                    ¡Hola! 👋 Soy tu asistente de inventario. Puedo analizar tus datos y darte <strong>recomendaciones estratégicas</strong> para tu empresa. ¿Qué te gustaría saber?
+                  ¡Hola! Soy el <strong>Asistente Virtual</strong> de consultas. Puedo ayudarte a saber si un producto está disponible, cuánto stock queda, precios, materiales y más. ¿Qué necesitas saber?
                   </div>
                 </div>
 
@@ -262,17 +286,36 @@ export default function ChatBot() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
+          {/* Área de entrada de texto */}
           <form onSubmit={handleSubmit} className="border-t border-slate-200 bg-slate-50 p-3">
+            {/* Error / counter row */}
+            <div className="flex justify-between items-center px-1 mb-1.5 min-h-[16px]">
+              {inputError ? (
+                <span className="text-[11px] text-red-500 font-medium">{inputError}</span>
+              ) : (
+                <span />
+              )}
+              <span className={`text-[11px] tabular-nums ${
+                input.length > MAX_CHARS ? 'text-red-500 font-semibold' : 'text-slate-400'
+              }`}>
+                {input.length}/{MAX_CHARS}
+              </span>
+            </div>
             <div className="flex items-center gap-2">
               <input
                 ref={inputRef}
                 type="text"
                 value={input}
-                onChange={e => setInput(e.target.value)}
+                onChange={e => {
+                  setInput(e.target.value);
+                  if (inputError) setInputError(null);
+                }}
                 placeholder={isLoading ? 'Pensando...' : 'Pregunta sobre tu inventario...'}
                 disabled={isLoading}
-                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-slate-400 disabled:opacity-50"
+                maxLength={MAX_CHARS + 1}
+                className={`flex-1 rounded-xl border bg-white px-4 py-2.5 text-sm outline-none transition placeholder:text-slate-400 disabled:opacity-50 ${
+                  inputError ? 'border-red-400 focus:border-red-400' : 'border-slate-200 focus:border-slate-400'
+                }`}
               />
               <button
                 type="submit"

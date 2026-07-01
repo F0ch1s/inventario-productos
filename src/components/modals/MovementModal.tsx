@@ -3,6 +3,7 @@ import { useStore } from '@nanostores/react';
 import Modal from '../ui/Modal';
 import { $products, addMovement, getStock, addNotification } from '../../stores/inventoryStore';
 import { isDiscreteUnit, validateQuantity } from '../../lib/calculations';
+import { generateId } from '../../lib/uuid';
 import type { Movement, MovementType } from '../../types';
 
 interface MovementModalProps {
@@ -44,7 +45,7 @@ export default function MovementModal({ isOpen, onClose }: MovementModalProps) {
     }
 
     const newMovement: Movement = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       productId: formData.get('productId') as string,
       date: new Date().toISOString(),
       type: formData.get('type') as MovementType,

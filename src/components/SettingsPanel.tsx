@@ -51,7 +51,7 @@ export default function SettingsPanel() {
             </div>
             <h2 className="text-3xl font-serif italic text-slate-900">Panel de ajustes</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Aquí puedes definir las opciones tradicionales del sistema para que este módulo quede completo y útil.
+              Personaliza cómo funciona el sistema: nombre de la empresa, moneda, alertas de stock y más.
             </p>
           </div>
 
@@ -177,26 +177,19 @@ export default function SettingsPanel() {
           );
         })}
 
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 xl:col-span-2">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 xl:col-span-2">
           <div className="flex items-start gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-slate-700 shadow-sm">
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Notas rápidas</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Información importante</h3>
               <p className="mt-1 text-sm text-slate-600">
-                Estas opciones están pensadas para completar el módulo de configuración con ajustes tradicionales
-                y dejarlo listo para futuras integraciones como encabezados personalizados, moneda en reportes y
-                alertas de stock.
+                Los cambios en esta sección se guardan automáticamente en el navegador.
+                El nombre de la empresa aparece en los reportes exportados (PDF/Excel).
+                El umbral de stock bajo define cuándo un producto aparece como crítico en el panel.
               </p>
             </div>
-          </div>
-          <div className="mt-5 flex flex-wrap gap-2 text-xs text-slate-500">
-            <span className="rounded-full bg-white px-3 py-1 shadow-sm">Encabezado de reportes</span>
-            <span className="rounded-full bg-white px-3 py-1 shadow-sm">Moneda</span>
-            <span className="rounded-full bg-white px-3 py-1 shadow-sm">Stock mínimo</span>
-            <span className="rounded-full bg-white px-3 py-1 shadow-sm">Notificaciones</span>
-            <span className="rounded-full bg-white px-3 py-1 shadow-sm">Auto guardado</span>
           </div>
         </div>
 

@@ -1,8 +1,6 @@
 import React from 'react';
-import { useStore } from '@nanostores/react';
 import Modal from '../ui/Modal';
 import { updateProduct } from '../../stores/inventoryStore';
-import { $branches } from '../../stores/branchStore';
 import type { Product, Unit, Branch } from '../../types';
 
 interface EditProductModalProps {
@@ -12,7 +10,6 @@ interface EditProductModalProps {
 }
 
 export default function EditProductModal({ isOpen, onClose, product }: EditProductModalProps) {
-  const branches = useStore($branches);
   
   if (!product) return null;
 
@@ -78,16 +75,11 @@ export default function EditProductModal({ isOpen, onClose, product }: EditProdu
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[10px] uppercase font-bold opacity-70">Sucursal</label>
-            <select
-              name="branch"
-              required
-              defaultValue={product.branch}
-              className="border-b-2 border-[#141414] py-2 focus:outline-none bg-white"
-            >
-              {branches.map(branch => (
-                <option key={branch.code} value={branch.code}>{branch.code}</option>
-              ))}
-            </select>
+            {/* Mantiene la sucursal original del producto */}
+            <input type="hidden" name="branch" value={product.branch || 'O10'} />
+            <div className="border-b-2 border-[#141414]/30 py-2 text-sm font-mono bg-slate-50 px-1 text-[#141414]/60">
+              {product.branch || 'O10'}
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">

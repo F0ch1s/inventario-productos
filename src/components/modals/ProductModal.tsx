@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useStore } from '@nanostores/react';
 import Modal from '../ui/Modal';
 import { addProduct, $products } from '../../stores/inventoryStore';
-import { $branches } from '../../stores/branchStore';
+import { generateId } from '../../lib/uuid';
 import type { Product, Unit, Branch } from '../../types';
 
 interface ProductModalProps {
@@ -37,7 +37,6 @@ function generateCode(description: string, existingProducts: Product[]): string 
 
 export default function ProductModal({ isOpen, onClose }: ProductModalProps) {
   const products = useStore($products);
-  const branches = useStore($branches);
   const [description, setDescription] = useState('');
 
   const autoCode = useMemo(() => generateCode(description, products), [description, products]);
@@ -46,7 +45,7 @@ export default function ProductModal({ isOpen, onClose }: ProductModalProps) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const newProduct: Product = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       code: autoCode,
       name: formData.get('name') as string,
       description: formData.get('description') as string,
@@ -110,11 +109,11 @@ export default function ProductModal({ isOpen, onClose }: ProductModalProps) {
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-[10px] uppercase font-bold opacity-70">Sucursal</label>
-            <select name="branch" required className="border-b-2 border-[#141414] py-2 focus:outline-none bg-white">
-              {branches.map(branch => (
-                <option key={branch.code} value={branch.code}>{branch.code}</option>
-              ))}
-            </select>
+            {/* Sucursal fija O10 — no editable */}
+            <input type="hidden" name="branch" value="O10" />
+            <div className="border-b-2 border-[#141414]/30 py-2 text-sm font-mono bg-slate-50 px-1 text-[#141414]/60">
+              O10
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">

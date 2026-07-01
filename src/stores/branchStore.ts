@@ -1,6 +1,7 @@
 import { atom } from 'nanostores';
 import type { BranchData, Notification } from '../types';
 import { $notifications } from './inventoryStore';
+import { generateId } from '../lib/uuid';
 
 export const $branches = atom<BranchData[]>([]);
 
@@ -40,7 +41,7 @@ export async function addBranch(branchData: Omit<BranchData, 'id'>): Promise<boo
   }
 
   const newBranch: BranchData = {
-    id: crypto.randomUUID(),
+    id: generateId(),
     code: branchData.code.toUpperCase(),
     name: branchData.name,
     description: branchData.description,

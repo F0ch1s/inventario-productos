@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Conexión principal a la base de datos (Supabase)
+// Usamos variables de entorno para mantener las credenciales seguras
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 const hasSupabaseConfig = Boolean(supabaseUrl && supabaseKey);

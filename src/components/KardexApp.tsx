@@ -19,7 +19,7 @@ import ChatBot from './ChatBot';
 
 // Feature flag: Asistente IA (Groq) desactivado temporalmente.
 // Para reactivarlo, cambiar a `true`. No requiere ningún otro cambio.
-const ASSISTANT_ENABLED = false;
+const ASSISTANT_ENABLED = true;
 
 const TAB_TITLES: Record<'es' | 'en', Record<TabType, string>> = {
   es: {
